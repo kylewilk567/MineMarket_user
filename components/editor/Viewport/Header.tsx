@@ -1,7 +1,7 @@
 import { useEditor } from '@craftjs/core';
 import { Tooltip } from '@material-ui/core';
 import cx from 'classnames';
-import React from 'react';
+import React, {useEffect} from 'react';
 import styled from 'styled-components';
 
 import Checkmark from '../../../public/icons/check.svg';
@@ -57,6 +57,32 @@ export const Header = () => {
     canUndo: query.history.canUndo(),
     canRedo: query.history.canRedo(),
   }));
+
+    // keystroke undo redo
+    useEffect(() => {
+      const handleKeyDown = (event: any) => {
+        if (event.ctrlKey || event.metaKey) {
+          if (event.key.toLowerCase() === 'z') {
+            event.preventDefault();
+            if (event.shiftKey) {
+              if (canRedo) {
+                actions.history.redo();
+              }
+            } else if (canUndo) {
+              actions.history.undo();
+            }
+          }
+        }
+      };
+  
+      window.addEventListener('keydown', handleKeyDown);
+  
+      const cleanup = () => {
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+      return cleanup;
+      
+    }, [canUndo, canRedo, actions]);
 
   return (
     <HeaderDiv className="header text-white transition w-full">
